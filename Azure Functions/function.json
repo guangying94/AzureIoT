@@ -1,0 +1,19 @@
+{
+  "bindings": [
+    {
+      "type": "eventHubTrigger",
+      "name": "myEventHubMessage",
+      "direction": "in",
+      "path": "workshopeventhub",
+      "connection": "PAworkshop_RootManageSharedAccessKey_EVENTHUB"
+    },
+    {
+      "type": "table",
+      "name": "outputTable",
+      "tableName": "resultML",
+      "connection": "artcworkshopstorage_STORAGE",
+      "direction": "out"
+    }
+  ],
+  "disabled": false
+}
