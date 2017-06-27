@@ -10,7 +10,6 @@ CONNECTION_STRING = "HostName=PAworkshop.azure-devices.net;DeviceId=pythonSimula
 # choose HTTP, AMQP or MQTT as transport protocol
 PROTOCOL = IoTHubTransportProvider.MQTT
 MESSAGE_TIMEOUT = 10000
-AVG_WIND_SPEED = 10.0
 AVG_TEMP = 25
 AVG_HUM =  63
 SEND_CALLBACKS = 0
