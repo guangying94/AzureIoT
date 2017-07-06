@@ -27,27 +27,27 @@ Let's map out the respective component with respective Azure services.
 
 ![Overview of solution architecture](https://jwm75w-dm2306.files.1drv.com/y4mSiTxWs3bFc30dNM4hZGUTZm7HL2CFpYVGFhENo9RLi9YYdB59n5eK2Fh4d_SSXuIp20xWNQXSY1W4z8tuSvxKQBmGBOzPzhlSJDmDtzyZeHA489khprkC8Kn2oPdqZzdGo0n0sePRRZB5b8nkSndo22JqR60JjBpz2GlJe8THIn5MzIBXtWfhlup2XpEpRybt__GRkdKUkIMFocZZFBPpA?width=1024&height=626&cropmode=none)
 
+We will start by building a simulator that sends random temperature and humidity readings to **IoT Hub**. IoT Hub will send the data to **Azure Stream Analytics**, which then stores the data in **Azure Table Storage** while computing the average temperature and humidity reading within a 10 seconds window. 
 
-We will start from building a simulator that sends random temperature and humidity readings into **IoT Hub**. Then, the data will pass thru **Azure Stream Analytics**, which allow us to store the data in **Azure Table Storage**, and at the same time, computer the average of reading value in a 10 seconds windows.
+This average is sent to **Azure Event Hub**, which acts as a data receiver. **Azure Event Hub** allows high speed data ingestion with low latency. Upon receiving a message, **Azure Event Hub** will trigger a function on **Azure Functions**, which forwards the readings to a service on **Azure Machine Learning Service** that predicts the status of the simulated device.
 
-Another output from **Azure Stream Analytics** is send the data to **Azure Event Hub**, which act as a data receiver. **Azure Event Hub** allows high speed data ingestion with low latency. From **Azure Stream Analytics**, we have computed the average value of readings, and will send a message to **Azure Event Hub** every 10 seconds. Once **Azure Event Hub** receive a message, it will trigger **Azure Function**, which help us send the readings to our **Azure Machine Learning Service** to predict the status. 
-
-Concurrently, once the machine learning module predicted the alert, **Azure Function** moves the predicted results into **Azure Table Storage** for web app. The web app can be built using any language such as Java, or .Net. For this workshop purpose, we are using **Power BI** dashboard as our dashboard. Two tiles are pinned, which show the live streaming data of temperature and humidity. Then, a textbox is pinned to indicate the status on machine. 
+If the machine learning module predicted a situation that requires an alert,  the **Azure Functions** moves the predicted results into **Azure Table Storage** for the web app. The web app can be built using any language such as Java, or .Net. For this workshop , we will use **Power BI** dashboard with two tiles showing live streamed data of temperature and humidity respectively. A textbox is also pinned on the dashboard to indicate the status of the simulated device. 
  
 Noted that this solution architecture is for reference / introductory purpose, there are many different services that the team can leverage on, based on the requirement. 
 
 ### 2. Preparation / Software needed
 
-We are leveraging the power of cloud to perform most of the tasks, nevertheless, we need code editor to create simulator, and some light code editing that will be inserted into Azure Services.
+We are leveraging the power of the cloud to perform most of the tasks required in this workshop. Nevertheless, we need a code editor to create the simulator  and do some light code editing.
 
 The following application will be helpful on setting up the development environment.
+
 1. [**Visual Studio 2017**](https://www.visualstudio.com/downloads/)
 1. [**Microsoft Azure Storage Explorer**](http://storageexplorer.com/)
 1. [**Device Explorer for IoT Hub devices**](https://github.com/Azure/azure-iot-sdk-csharp/releases)
 
 To complete the exercise, you will need an Azure account. You can sign up for a trial account easily here: [Create Azure account](https://azure.microsoft.com/en-us/free/). 
 
-In this tutorial, we will be using C# as the main development language. The whole idea of this tutorial is to assist the team on understand the concept of various Azure services. Once the understanding is established, the team can use any supported language for development.
+In this tutorial, we will be using C# as the main development language. The whole idea of this tutorial is to assist participants in understanding the concepts within the various Azure services. Once that understanding is established, the team can use any supported language for development.
 
 During the process of installation, please choose C# or .Net to install the components. 
 
@@ -58,7 +58,7 @@ First, we will create a simple simulator that generate temperature and humidity 
 ![Simulator setup](https://vavfqw-dm2306.files.1drv.com/y4mh95G2b8TVd2bOYLqcFfPUaDQ3g3MuaTgCEt7vUdjuzdAj9Kmj-KhYl_yGV5iyCTx6BcGHf3wMCcIgAASioT698WDq5OhMUiS74-1n48M_h03SLWFyu5LhnQq--wPkkZn0oG2XoIAjGABstgYd4mP_BvvCLjfS3jEVuI7qsCPb80k9vabxuuGQCbSPv-axvchnurehD5Ikg_vqb5ELubvCA?width=1024&height=576&cropmode=none)
 
 #### 3.1 Manage NuGet Package
-Once you created the project, on the top navigation bar, click **Tools** -> **NuGet Package Manager** -> **Manage Nuget Packages for solution...**. Then select **Browse**, search for **Microsoft.Azure.Devices.Client**, and select install to install the package. This procedure downloads, installs and adds a reference to the _Azure IoT Service SDK_ NuGet package and its dependencies.
+Once you created the project, on the top navigation bar, click **Tools** -> **NuGet Package Manager** -> **Manage Nuget Packages for Solution...**. Then select **Browse**, search for **Microsoft.Azure.Devices.Client**, and select install to install the package. This procedure downloads, installs and adds a reference to the _Azure IoT Service SDK_ NuGet package and its dependencies.
 
 ![Simulator setup 2](https://v4bsog-dm2306.files.1drv.com/y4muW_Xhf-YWIZgvHbxvm81ZklGxsVxSvi7v-QwcEgiRvhW3zawZ20Gy5xnm73jCZAsKj7oysmJ0hSnt2VIO1TqD7JLVD_Vduf-2hCnEfudfF3gnfNkVdObhZwe-D27YS0nkpGzxXwcfAt8NxlmCAVFpkNG7bnDNnd_iKeqvrmcB3wWUL9xC2Bwy8BhwBdwmUr2TD5GzQVuSen5cBAjRsAD7w?width=1440&height=810&cropmode=none)
 
@@ -80,7 +80,7 @@ static string deviceKey = "{device key}";
 ```
 
 ##### Methods
-Add the following methodto the **Program** class.
+Add the following method to the **Program** class.
 
 This method will generate random _temperature_ and _humidity_ readings, and then send it over to Azure IoT Hub using the connection string that we established in previous section. 
 
@@ -149,7 +149,7 @@ The device or IoT devices has internet connection and is possible to connect to 
 If the environment requires a custom field gateway, then the devices can connect tp the field gateway directly, and from gateway, the system will process the data and send it over to Azure.
 
 ##### 3. Custom Cloud Gateway
-This is similar to method 1, but it will go thru another cloud gateway instead of sending telemtry to Azure directly. 
+This is similar to method 1, but it will go thru another cloud gateway instead of sending telemetry to Azure directly. 
 
 ##### 4. Field Gateway + Custom Cloud Gateway
 This is combination of method 1 and 2, and the connection between field gateway and custom cloud gateway is established via VPN.
@@ -235,9 +235,9 @@ This conclude **Azure IoT Hub**. You can find more information here: [**Azure Io
 
 With the events/telemetry sending to Azure via **Azure IoT Hub**, now let's look at the second component of the architecture, which is _Event Processing_.
 
-**Azure Stream Analytics** offers the processing, analytics and handling of massive ammounts of real time data. Besides that, **Azure Stream Analytics** can be configured to be expose for the settings of rules and alarms. **Azure Stream Analytics** then runs these rules as it processes the incoming data ingestion and flags what needs to be escalated for attention. To configure stream analytics, usrs can use simple SQL syntax to program _if-this-then-that_ style rules and instruction. 
+**Azure Stream Analytics** offers the processing, analytics and handling of massive ammounts of real time data. Besides that, **Azure Stream Analytics**  you can configure rules and alarms. **Azure Stream Analytics** then runs these rules as it processes the incoming data ingestion and flags what needs to be escalated for attention. To configure stream analytics, users can use simple SQL syntax to program _if-this-then-that_ style rules and instruction. 
 
-**Azure Stream Analytics** can not only handle millions of events per second but it can also correlate across multiple independent streams of data simultaneously. This high speed event processing allows for the real time detection of anomalies or escalations vased on threshold breaches or alarm settings as the data is ingested. The architecture is simple and easily scalable to an enterprise ready solution.
+**Azure Stream Analytics** can not only handle millions of events per second but it can also correlate across multiple independent streams of data simultaneously. This high speed event processing allows for the real time detection of anomalies or escalations based on threshold breaches or alarm settings as the data is ingested. The architecture is simple and easily scalable to an enterprise ready solution.
 
 To create **Azure Stream Analytics**, go to Azure portal. On the left hand panel, click "**+**", search for "_stream analytics_", and click **"Stream Analytics job"**. Click create, and fill up the name and choose the resource group. Here, you can choose the same resource group as **Azure IoT Hub**. 
 
@@ -253,16 +253,16 @@ We will configure all 3 components to enable the streaming job.
 ![image](https://hij1ug-dm2306.files.1drv.com/y4ml8KtlnId56PZQhUnqauzhiYAGFs0L9zlzbKb0ncIpS4ExDPhEywATbDF-cT6hT5G35GWnQQ7lpfRC89tax95-Vwm2RSR1PfCNdfAge6rk3-mq1AquCBxkAKY123MAO00Li3EH06OFenm-arNmiCPohUEsrBv50cd2pqeZyYy173UoFxtzypziu-znV-BkikZ1txbGMn32f6z8hAndSYFHQ?width=1440&height=810&cropmode=none)
 
 ##### 5.1 Inputs
-First, we configure the input of **Azure Stream Analytics**. We will use the event from **Azure IoT Hub** as our input. Click the "_Inputs_" box, on the top panel, click "**+** Add". Give the "_Input alias_" a name, and the "_Source Type_" choose "Data Stream". 
+First, we configure the input of **Azure Stream Analytics**. We will use the event from **Azure IoT Hub** as our input. Click the "_Inputs_" box, on the top panel, click "**+** Add". Give the "_Input alias_" a name, and the "_Source Type_" choose "Data Stream". Then. choose IoTHub for Source.
 
 In "_Import option_", choose "Use IoT hub from current subscription", and choose the IoT hub that we just created. For "_Shared access policy name_", choose "iothubowner". Note that the "_Event serialization format_" should be "**JSON**", as the simulator sends telemetry in JSON format. Once done, click "Create".
 
 ![image](https://izccxq-dm2306.files.1drv.com/y4mRTb0o4Lc0aJPzbr9YCbNZnJChejbEnewhA9jn0QX0Yzplx6Xeh5R8_OLSCmgLouNtVLPfxvhDP_O_QLE15tNiF4dtkFXKXLo3h-8YOAQzBr9i55zChQz_THsba1AoTvFAV_4hhS-If_TwYJ7SAw3PCUJCjSZ84n6HgcPXjRfWYM5vi7o9iKVQ7KplJlGPFo9SnwMKYloDF-OsjEr4epIpg?width=1440&height=810&cropmode=none)
 
-In this exercise, we are creating a single input. However, **Azure Stream Analytics** allows multiple inputs, and user can configure respectively. 
+In this exercise, we are creating a single input. However, **Azure Stream Analytics** allows multiple inputs, and users can configure as required. 
 
 ##### 5.2 Outputs
-To configure output, the process is similar. Users create the output depends on the requirement. In this exercise, we will create an output to store every single telemetry in **Azure Table Storage**, and stream the data to **Power BI** for visualization. Finally, we will calculate the average value of the sensors in a 10-seconds windows, and send it to **Azure Event Hub** as new message, which will then be push to **Azure Machine Learning** for analysis.
+To configure output, the process is similar. Users can create as many output as required. In this exercise, we will create an output to store every single telemetry in **Azure Table Storage**, and stream the data to **Power BI** for visualization. Finally, we will calculate the average value of the sensors in a 10-seconds window, and send it to **Azure Event Hub** as a new message, which will then be pushed to **Azure Machine Learning** for analysis.
 
 ###### 5.2.1 Table Storage
 On the output panel, click "**+** Add", give the output a name, and under "_Sink_", choose "**Table Storage**". Choose "**Use table storage from current subscription**", and choose the storage account that we created. _Please refer to next section on how to create **Azure Storage** account._
@@ -291,7 +291,7 @@ Once done, click "Create".
 
 
 ##### 5.3 Query
-Now, with 3 different output stream, we will define the query and output the respective data. Click on the "**Query**" box. Let's start from stream the telemetry to **Azure Table Storage**.
+Now, with 3 different output stream, we will define the query and output the respective data. Click on the "**Query**" box. Let's by streaming the telemetry to **Azure Table Storage**.
 
 First, we define the input stream. We are using SQL-like language while creating the query.
 
