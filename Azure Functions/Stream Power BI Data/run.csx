@@ -71,7 +71,7 @@ public class PowerBIStream
 	public static async void pushBI(string status)
 	{
 		string content;
-		string uri = "<PowerBI Streaming Dataset"; //replace this with the Power BI Streaming Dataset Push API
+		string uri = "<PowerBI Streaming Dataset>"; //replace this with the Power BI Streaming Dataset Push API
 
 		if(status == "Safe")
 		{
