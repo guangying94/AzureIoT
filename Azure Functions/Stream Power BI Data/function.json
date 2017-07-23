@@ -1,0 +1,21 @@
+{
+  "bindings": [
+    {
+      "type": "table",
+      "name": "outputTable",
+      "tableName": "resultML",
+      "connection": "iotcisdemo_STORAGE",
+      "direction": "out"
+    },
+    {
+      "type": "eventHubTrigger",
+      "name": "myEventHubMessage",
+      "path": "iotcisdemo",
+      "consumerGroup": "$Default",
+      "connection": "iotcisdemo_RootManageSharedAccessKey_EVENTHUB",
+      "cardinality": "many",
+      "direction": "in"
+    }
+  ],
+  "disabled": false
+}
