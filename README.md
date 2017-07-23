@@ -795,6 +795,58 @@ Try run the simulator and observe the line graph!
 
 ![image](https://ipckxq-dm2306.files.1drv.com/y4mL6dcg2MGh6PuRdTsP6HlHkqoAkQ3Q8-OCyzpJuGvblBPKD3hkPZmaKrg61ftiu_IoRfxFg2H8_PYPeKultm4NorSEy9O3b6v9cEai0vktswItWgYuXJsFlILK-EdtvEvQLGJejZLXcxrAuGLZcly7eLDd1hJvarhU3knIpF0z1W1mfLEwm35383ffIOYX337SbVB7VS-fW19s3FU9smakQ?width=1440&height=810&cropmode=none)
 
+#### Optional
+In previous example, we are leveraging **Azure Stream Analytics** to create streaming data set in **Power BI**. In this section, let's discuss on how to create your own streaming data set in **Power BI**, for instance, we want to stream predicted value into dashboard.
+
+To create a streaming data, navigate to "_Datasets_", and click ** + Create ** on top right corner, select _Streaming dataset_ and choose _API_. Then, give your dataset a name, and define the schema of your data. In this case, I want to stream predicted value, thus i define the schema as following:
+
+![image](https://gyjxwg-dm2306.files.1drv.com/y4mze7b-l7v0BukHWa9hIRsvKm0ODnJtgQg6MSksHESlzhkLb8jUQ37n2TJf4fX-DvwYjf8HG0nOYM8oZpbdBTlHBLQPyC0YD-pejBRvyRaqoPXeTYPW1dWdnx5ybEyNwhHHcCaggGrXC8J2S67lYMWWy1j_Fn3bFanPU7Tv8uZX4PgTSQ-IAeIoFfQsJz6m8TUjHoJfziHdcS69nWRz9tVOg?width=1600&height=860&cropmode=none)
+
+Click create, and copy the **Push URL**. The idea is we will perform HTTP Post to push the data into **Power BI** as streaming data, then we can leverage this data and pin it in our dashboard.
+
+Back to **Azure Function**, let's do some modification. First, add a new class, which is essentially a HTTP Client and we perform HTTP Post. Replace the uri with the **Push URL** that you copied. 
+
+```csharp
+public class PowerBIStream
+{
+	public static async void pushBI(string status)
+	{
+		string content;
+		string uri = "<PowerBI Streaming Dataset>"; //replace this with the Power BI Streaming Dataset Push API
+
+		if(status == "Safe")
+		{
+			content = "{\"Status\":\"0\"}";
+		}
+		else if(status == "Warning")
+		{
+			content = "{\"Status\":\"1\"}";
+		}
+		else
+		{
+			content = "{\"Status\":\"404\"}";
+		}
+
+    	using (var client = new HttpClient())
+    	{
+        	var response = await client.PostAsync(uri, new StringContent(content, Encoding.UTF8, "application/json"));
+    	}
+		
+	}	
+}
+```
+Then, in the main function, add in this line:
+
+```csharp
+	await PowerBIStream.pushBI(status);
+ ```
+ 
+ Then you are done! Whenever there's a new predicted value, **Azure Function** will call this URL and push the data into **Power BI** as streaming dataset.
+ 
+ Now, you can create a new streaming tile, just like what we did previously to visualize the value. This is a sample dashboard.
+ 
+ ![image](https://hpcyzq-dm2306.files.1drv.com/y4m6BLi-9uVnG86aq7xVXShsgM7Ply5UsUH_iGQQpGE-piIGZg7WVqOhS7rwLyUii1sWzQX6Xth2u4Q22k8RvXzI0JrgmCEi_YOsMD6Y8B-oRMyzcAppZZItpum1DR8-_FI8eU0grp2HtUXtHN3kIyuEqnCut0WsZH-w5cgZIxEbOGRRzxMByzRx5B-47QTg2DPXGFyXdoWldim6LRwROsYzw?width=1600&height=860&cropmode=none)
+ 
 ### 11. Others
 
 This exercise serves as an exercise to understand Azure IoT offering. The architecture used in this exercise is for reference, and depends on the need, you can customize the solution.
