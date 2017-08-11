@@ -75,7 +75,7 @@ Then, add the following fields to the **Program** class. Note that there are 2 p
 
 ```csharp
 static DeviceClient deviceClient;
-static string intHubUri = "{iot hub hostname}";
+static string iotHubUri = "{iot hub hostname}";
 static string deviceKey = "{device key}";
 ```
 
